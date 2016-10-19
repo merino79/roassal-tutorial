@@ -1,0 +1,156 @@
+{
+   "metadata": {
+     "title": "Roassal Tutorial",
+     "author": "Leonel Merino",
+     "author": "Alexandre Bergel",
+     "year":"2016" 
+   }
+}
+!Roassal Tutorial
+
+The following tutorial is designed to introduce users to the Roassal visualization engine. At the end of the tutorial, users will be familiar to the basic API of Roassal. Users will know how to visualize objects to enable exploration and analysis of object's properties and relationships by using the features offered by the engine such as shapes, layout, color, size, interactions. Users should also be able to know where to find more information to resolve doubts and to get deeper knowledge in the engine. The tutorial is split in three parts: 
+#Hand's on session, 
+#Examples of Roassal's builders, and 
+#Pointers to find more information. 
+
+Let's start.
+
+!Installation
+#Download the latest version of Moose
+#If you want to use the Pharo image you can follow the instruction in the Roassal website
+
+!Hands-on (blue added code; red removed code)
+!! View, Shape (color, size) and Layout
+
+@@goal Show a collection of elements with a grid layout
+#Create a RTView object
+#Depict ArgoUML packages by RTEllipse shapes 
+#Apply a RTGridLayout
+
+[[[language=smalltalk
+view := RTView new.
+shape := RTEllipse new size: 10; color: Color red.
+els := shape elementsOn: MooseModel root first allNamespaces.
+view addAll: els.
+RTGridLayout on: els.
+view open
+]]]
+
+!!Edges
+
+
+@@goal Show the class hierarchy through edges with a tree layout.
+
+
+#Add edges from each package its dependents packages 
+#Change the layout to a RTCircleLayout
+[[[language=smalltalk
+view := RTView new.
+shape := RTBox new height: 5; width:5; color: [Color random].
+els := shape elementsOn: MooseModel root first allNamespaces.
+view addAll: els.
+RTEdge buildEdgesFromObjects: (MooseModel root first allInvocations first:100) from:[:e| e sender belongsTo container] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTLine new color: (Color green alpha:0.1)) inView: view.
+RTCircleLayout new initialRadius:200; on: els.
+view open
+]]]
+
+!!Interactions
+Goal: Try interactions for elements and for the view.
+#Set elements RTDraggable
+#Add Popup to elements
+#Set elements RTHighlightable 
+#Set elements RTSetAlphaEdge 
+#Set view RTDraggableView
+
+[[[language=smalltalk
+view := RTView new.
+shape := RTBox new height: 5; width:5; color: [Color random].
+els := shape elementsOn: MooseModel root first allNamespaces.
+view addAll: els.
+RTEdge buildEdgesFromObjects: (MooseModel root first allInvocations first:100) from:[:e| e sender belongsTo container] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTLine new color: (Color green alpha:0.1)) inView: view.
+RTCircleLayout new initialRadius:200; on: els.
+view @ RTDraggableView.
+els @ RTDraggable.
+els @ RTPopup.
+els @ RTHighlightable.
+els @ RTSetEdgeAlpha.
+view open
+]]]
+
+!!Nesting
+Goal: Show dependencies of the largest package
+#Exclude the largest package from the group
+#Add it in a new group
+#Add the classes as nodes nested in it
+#Modify the edges to put focus in the largest package
+
+[[[language=smalltalk
+view := RTView new.
+max := MooseModel root first allNamespaces max:[:e| e classes size].
+shape := RTBox new height: 5; width:5; color: [Color random].
+els := shape elementsOn: (MooseModel root first allNamespaces reject:[:e| e classes = max]).
+view addAll: els.
+el := (RTBox new color: Color random) elementsOn: (MooseModel root first allNamespaces select:[:e| e classes size = max]).
+view add: el.
+RTNest new for: el add:[:group :pkg|
+classes).
+group addAll:(RTBox new elementsOn: pkg
+RTGridLayout on: group. ].
+RTEdge buildEdgesFromObjects: ((MooseModel root first allInvocations select:[:e| e sender belongsTo container classes size = max]) first:100) from:[:e| e sender belongsTo] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTLine new color: (Color green alpha:0.1)) inView: view.
+RTCircleLayout new initialRadius:200; on: els. view @ RTDraggableView.
+el @ RTDraggable.
+els @ RTDraggable.
+els @ RTPopup.
+els @ RTHighlightable. els @ RTSetEdgeAlpha. 
+view open
+]]]
+
+!!Metrics and properties
+Goal: Map metrics and properties to visual dimensions.
+#Define size of packages as NOC (Number of Classes) 
+#Define color red in classes (with more than 100 LOC) 
+#Define color white in classes (which are interfaces) 
+#Define color blue in classes (the rest)
+#Add a menu to packages with inspect and browse actions 
+#Normalize the size of packages
+
+[[[language=smalltalk
+view := RTView new.
+max := MooseModel root first allNamespaces max:[:e| e classes size].
+shape := RTEllipse new size: [:e| e classes size]; color: [Color random].
+els := shape elementsOn: (MooseModel root first allNamespaces reject:[:e| e classes = max]).
+view addAll: els.
+el := (RTBox new color: Color darkGray) elementsOn: (MooseModel root first allNamespaces select:[:e| e classes size = max]).
+view add: el.
+RTNest new for: el add:[:group :pkg|
+group addAll:(RTBox new color: [:e| e isInterface ifTrue:[ Color white] ifFalse:[e
+numberOfLinesOfCode > 200 ifTrue:[Color red] ifFalse:[Color blue] ] ]; elementsOn: pkg classes).
+RTGridLayout on: group. group @ RTHighlightable. group @ RTSetEdgeAlpha.
+].
+RTEdge buildEdgesFromObjects: ((MooseModel root first allInvocations select:[:e| e sender belongsTo container classes size = max]) first:200) from:[:e| e sender belongsTo] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTArrowedLine new color: (Color green alpha:0.1)) inView: view.
+RTCircleLayout new initialRadius:300; on: els. RTMetricNormalizer new
+elements: els;
+normalizeSize:[:e| e classes size] min: 10 max: 50. view @ RTDraggableView.
+el @ RTDraggable.
+els @ RTDraggable.
+els @ (RTPopup new textElement:[:e| e model name]).
+els @ RTHighlightable.
+els @ (RTMenuActivable new action: #inspect; action:#browse).
+els @ RTSetEdgeAlpha.
+view open
+]]]
+
+!Builders
+A builder encapsulates the logic of visualization and it maps a particular domain to visual elements. It eases the reuse of domain-specific visualizations. Developers can define custom builders by sub classing RTBuilder. The custom builder should define public methods for end-users to specify the objects to be visualized, layouts that can be applied and any other attribute specific to the domain. The custom builder should override the renderIn: method where it can specify how the visualization is built. The following examples (amongst others) of domain-specific builder are found in Roassal Examples.
+#UML
+#RTCharterBuilder III. RTPieBuilder
+#RTSpectrograph V. RTSunburstBuilder VI. RTGraphBuilder
+#RTNameCloud
+#RTMondrianViewBuilder
+#RTMapLocationBuilder
+
+!Resources
+#Agilevisualization.com (book in progess)
+#Roassalexamples
+#Deep into Pharo book
+#Mailing lists Pharo / Moose
