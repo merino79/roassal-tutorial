@@ -6,7 +6,19 @@
      "year":"2016" 
    }
 }
+
+!SOME GENERAL COMMENTS
+- We need to have the .mse file available somewhere. If we do that, we also need to have the source code. The tutorial has to indicates how to load .mse and how to set the root folder (to have the source code for methods)
+- The tutorial can have a first part that simply play with some numbers. We can then show the basic of Moose query and let the students adapt their script to visualize source code
+- Important question, will the student know the syntax of Pharo before?
+- There is a problem with the figure. The reference says 0.1 ? That is weird.
+- Also, the template of the .html is very ugly. With Agile Visualization, the HTML looks like *https://dl.dropboxusercontent.com/u/31543901/AgileVisualization/QuickStart/0101-QuickStart.html*. When I generate it, there is no css apparently. Any idea why?
+
 !Roassal Tutorial
+
+Roassal is a visualization engine largely used within the Pharo community. Roassal is used to visualize any set of data. In particular, it is often used to visualize large software source code base to assess their internal quality.
+
+@@What is the goal of the tutorial? 
 
 The following tutorial is designed to introduce users to the Roassal visualization engine. At the end of the tutorial, users will be familiar to the basic API of Roassal. Users will know how to visualize objects to enable exploration and analysis of object's properties and relationships by using the features offered by the engine such as shapes, layout, color, size, interactions. Users should also be able to know where to find more information to resolve doubts and to get deeper knowledge in the engine. The tutorial is split in three parts: 
 #Hand's on session, 
@@ -16,8 +28,11 @@ The following tutorial is designed to introduce users to the Roassal visualizati
 Let's start.
 
 !Installation
-#Download the latest version of Moose
-#If you want to use the Pharo image you can follow the instruction in the Roassal website
+Roassal is easy to install and the installation will not polute your file system. Simply download Moose as indicated on *http://moosetechnology.org*. You need three downloads: Moose 6.1 image, Pharo60.sources, and a virtual machine. The virtual machine depends on your operating system.
+
+On Max OSX, you can open Moose (which contains Roassal) by drag and dropping the file moose-6.1.image on top of the virtual machine. You should obtain something like in Figure *openingMoose*.
+
++Opening moose>file://figures/openingMoose.png|label=openingMoose|width=40+
 
 !Hands-on (blue added code; red removed code)
 !! View, Shape (color, size) and Layout
