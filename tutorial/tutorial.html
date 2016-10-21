@@ -49,165 +49,332 @@
   <body>
     <div class="container">
     <section>
-<h1>1. Roassal Tutorial</h1>
+<h1>1. SOME GENERAL COMMENTS</h1>
+<ul>
+<li>We need to have the .mse file available somewhere. If we do that, we also need to have the source code. The tutorial has to indicates how to load .mse and how to set the root folder (to have the source code for methods)</li>
+<li>The tutorial can have a first part that simply play with some numbers. We can then show the basic of Moose query and let the students adapt their script to visualize source code</li>
+<li>Important question, will the student know the syntax of Pharo before?</li>
+<li>There is a problem with the figure. The reference says 0.1 ? That is weird.</li>
+<li>Also, the template of the .html is very ugly. With Agile Visualization, the HTML looks like <a href="https://dl.dropboxusercontent.com/u/31543901/AgileVisualization/QuickStart/0101-QuickStart.html">https://dl.dropboxusercontent.com/u/31543901/AgileVisualization/QuickStart/0101-QuickStart.html</a>. When I generate it, there is no css apparently. Any idea why?</li>
+</ul>
+
+</section><section>
+<h1>2. Roassal Tutorial</h1>
 
 <p>
-The following tutorial is designed to introduce users to the Roassal visualization engine. At the end of the tutorial, users will be familiar to the basic API of Roassal. Users will know how to visualize objects to enable exploration and analysis of object's properties and relationships by using the features offered by the engine such as shapes, layout, color, size, interactions. Users should also be able to know where to find more information to resolve doubts and to get deeper knowledge in the engine. The tutorial is split in three parts: 
-</p><ol><li>Hand's on session, </li>
-<li>Examples of Roassal's builders, and </li>
-<li>Pointers to find more information. </li>
-</ol>
-
+Roassal is a visualization engine largely used within the Pharo community. Roassal is used to visualize any set of data. In particular, it is often used to visualize large software source code base to assess their internal quality.
+</p>
+<p class="What">is the goal of the tutorial? </p>
 <p>
-Let's start.
+The following tutorial has been designed to introduce users to the Roassal visualization engine. At the end of the tutorial, users will be familiar to the basic API of Roassal as well with the domain-specific builders. Users will know how to visualize objects within a domain to enable exploration and analysis. They will visualize properties and relationships using the features offered by the engine such as shapes, layout, color, size, interactions (to name a few). Users should also be able to know where to find answers to further questions and to get deeper knowledge in the engine. Let's start.
+</p>
+
+<section>
+<h2>2.1. Installation</h2>
+<p>
+Roassal is easy to install and the installation will not polute your file system. Simply download Moose as indicated on <a href="http://moosetechnology.org">http://moosetechnology.org</a>. You need three downloads: Moose 6.1 image, Pharo60.sources, and a virtual machine. The virtual machine depends on your operating system.
+</p>
+<p>
+On Max OSX, you can open Moose (which contains Roassal) by drag and dropping the file moose-6.1.image on top of the virtual machine. You should obtain something like in Figure <a href=""></a>.
+</p>
+<p>
+<a id="openingMoose"></a>
+<figure>
+	<img src="figures/openingMoose.png" width="40%"/>
+	<figcaption>0.1. Opening moose</figcaption>
+</figure>
 </p>
 </section><section>
-<h1>2. Installation</h1>
-<ol><li>Download the latest version of Moose</li>
-<li>If you want to use the Pharo image you can follow the instruction in the Roassal website</li>
-</ol>
-
-</section><section>
-<h1>3. Hands-on (blue added code; red removed code)</h1>
+<h2>2.2. Hand's on: Basic Roassal API</h2>
+<p>
+In the following section we are going to incrementally use the basics of the Roassal API. In each step we (1) define a goal, (2) list required actions to achieve the goal, (3) show the changes to be made to the source code of the previous step (second step on), and (4) how the code of the visualization should look like after the changes (that you can copy/paste). 
+</p>
 <section>
-<h2>3.1. View, Shape (color, size) and Layout</h2>
+<h3>2.2.1. View, Shape, Layout and Interaction</h3>
 
-<p class="goal">Show a collection of elements with a grid layout</p><ol><li>Create a RTView object</li>
-<li>Depict ArgoUML packages by RTEllipse shapes </li>
-<li>Apply a RTGridLayout</li>
+<p class="goal">Visualize the <code>Collection</code> class hierarchy using a grid layout</p><ol><li>Create an RTView object</li>
+<li>Create elements using an <code>RTBox</code> shape to represent each class</li>
+<li>Add the elements to the view</li>
+<li>Lay the elements out using an <code>RTGridLayout</code></li>
 </ol>
 
-<figure><pre><code class="smalltalk">view := RTView new.
-shape := RTEllipse new size: 10; color: Color red.
-els := shape elementsOn: MooseModel root first allNamespaces.
+<figure><pre><code class="smalltalk">classes := Collection withAllSubclasses.
+view := RTView new.
+els := RTEllipse new
+	elementsOn: classes.
 view addAll: els.
 RTGridLayout on: els.
-view open</code></pre><figcaption></figcaption></figure>
-
-</section><section>
-<h2>3.2. Edges</h2>
-
-
-<p class="goal">Show the class hierarchy through edges with a tree layout.</p>
-
-<ol><li>Add edges from each package its dependents packages </li>
-<li>Change the layout to a RTCircleLayout</li>
-</ol>
-<figure><pre><code class="smalltalk">view := RTView new.
-shape := RTBox new height: 5; width:5; color: [Color random].
-els := shape elementsOn: MooseModel root first allNamespaces.
-view addAll: els.
-RTEdge buildEdgesFromObjects: (MooseModel root first allInvocations first:100) from:[:e| e sender belongsTo container] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTLine new color: (Color green alpha:0.1)) inView: view.
-RTCircleLayout new initialRadius:200; on: els.
-view open</code></pre><figcaption></figcaption></figure>
-
-</section><section>
-<h2>3.3. Interactions</h2>
-<p>
-Goal: Try interactions for elements and for the view.
-</p><ol><li>Set elements RTDraggable</li>
-<li>Add Popup to elements</li>
-<li>Set elements RTHighlightable </li>
-<li>Set elements RTSetAlphaEdge </li>
-<li>Set view RTDraggableView</li>
-</ol>
-
-<figure><pre><code class="smalltalk">view := RTView new.
-shape := RTBox new height: 5; width:5; color: [Color random].
-els := shape elementsOn: MooseModel root first allNamespaces.
-view addAll: els.
-RTEdge buildEdgesFromObjects: (MooseModel root first allInvocations first:100) from:[:e| e sender belongsTo container] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTLine new color: (Color green alpha:0.1)) inView: view.
-RTCircleLayout new initialRadius:200; on: els.
+els @ RTPopup.
+els @ RTDraggable.
 view @ RTDraggableView.
-els @ RTDraggable.
-els @ RTPopup.
-els @ RTHighlightable.
-els @ RTSetEdgeAlpha.
-view open</code></pre><figcaption></figcaption></figure>
+view</code></pre><figcaption></figcaption></figure>
+
 
 </section><section>
-<h2>3.4. Nesting</h2>
-<p>
-Goal: Show dependencies of the largest package
-</p><ol><li>Exclude the largest package from the group</li>
-<li>Add it in a new group</li>
-<li>Add the classes as nodes nested in it</li>
-<li>Modify the edges to put focus in the largest package</li>
+<h3>2.2.2. Size, Color and Customize Popup</h3>
+
+<p class="goal">Map to the size and color of each box metrics of classes</p><ol><li>When creating the elements send the messages <code>color:</code>, <code>size:</code></li>
+<li>Customize the <code>text:</code> of the popup </li>
 </ol>
 
-<figure><pre><code class="smalltalk">view := RTView new.
-max := MooseModel root first allNamespaces max:[:e| e classes size].
-shape := RTBox new height: 5; width:5; color: [Color random].
-els := shape elementsOn: (MooseModel root first allNamespaces reject:[:e| e classes = max]).
+<p>
+<img src="figures/code_changes_1.png" width="100%"/>
+</p>
+<figure><pre><code class="smalltalk">classes := Collection withAllSubclasses.
+view := RTView new.
+els := RTEllipse new
+	color: [ :e | Color gray: 1 - (e methods size / (classes max: [ :c | c methods size ])) ];
+	size: [ :e | e numberOfLinesOfCode ];
+	elementsOn: classes.
 view addAll: els.
-el := (RTBox new color: Color random) elementsOn: (MooseModel root first allNamespaces select:[:e| e classes size = max]).
-view add: el.
-RTNest new for: el add:[:group :pkg|
-classes).
-group addAll:(RTBox new elementsOn: pkg
-RTGridLayout on: group. ].
-RTEdge buildEdgesFromObjects: ((MooseModel root first allInvocations select:[:e| e sender belongsTo container classes size = max]) first:100) from:[:e| e sender belongsTo] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTLine new color: (Color green alpha:0.1)) inView: view.
-RTCircleLayout new initialRadius:200; on: els. view @ RTDraggableView.
-el @ RTDraggable.
+RTGridLayout on: els.
+els @ (RTPopup new text: [ :e | e name , ' -&gt; ' , e methods size asString ]).
 els @ RTDraggable.
-els @ RTPopup.
-els @ RTHighlightable. els @ RTSetEdgeAlpha. 
-view open</code></pre><figcaption></figcaption></figure>
+view @ RTDraggableView.
+view</code></pre><figcaption></figcaption></figure>
+
 
 </section><section>
-<h2>3.5. Metrics and properties</h2>
-<p>
-Goal: Map metrics and properties to visual dimensions.
-</p><ol><li>Define size of packages as NOC (Number of Classes) </li>
-<li>Define color red in classes (with more than 100 LOC) </li>
-<li>Define color white in classes (which are interfaces) </li>
-<li>Define color blue in classes (the rest)</li>
-<li>Add a menu to packages with inspect and browse actions </li>
-<li>Normalize the size of packages</li>
+<h3>2.2.3. Edges</h3>
+<p class="goal">Show the class hierarchy using edges and a tree layout.</p>
+
+<ol><li>Add edges from the superclass to the subclass </li>
+<li>Change the layout to a <code>RTTreeLayout</code></li>
 </ol>
 
-<figure><pre><code class="smalltalk">view := RTView new.
-max := MooseModel root first allNamespaces max:[:e| e classes size].
-shape := RTEllipse new size: [:e| e classes size]; color: [Color random].
-els := shape elementsOn: (MooseModel root first allNamespaces reject:[:e| e classes = max]).
+<p>
+<img src="figures/code_changes_2.png" width="100%"/>
+</p>
+
+<figure><pre><code class="smalltalk">classes := Collection withAllSubclasses.
+view := RTView new.
+els := RTEllipse new
+	color: [ :e | Color gray: 1 - (e methods size / (classes max: [ :c | c methods size ])) ];
+	size: [ :e | e numberOfLinesOfCode ];
+	elementsOn: classes.
 view addAll: els.
-el := (RTBox new color: Color darkGray) elementsOn: (MooseModel root first allNamespaces select:[:e| e classes size = max]).
-view add: el.
-RTNest new for: el add:[:group :pkg|
-group addAll:(RTBox new color: [:e| e isInterface ifTrue:[ Color white] ifFalse:[e
-numberOfLinesOfCode &gt; 200 ifTrue:[Color red] ifFalse:[Color blue] ] ]; elementsOn: pkg classes).
-RTGridLayout on: group. group @ RTHighlightable. group @ RTSetEdgeAlpha.
-].
-RTEdge buildEdgesFromObjects: ((MooseModel root first allInvocations select:[:e| e sender belongsTo container classes size = max]) first:200) from:[:e| e sender belongsTo] toAll:[:e| e candidates collect:[:each| each belongsTo container] ] using: (RTArrowedLine new color: (Color green alpha:0.1)) inView: view.
-RTCircleLayout new initialRadius:300; on: els. RTMetricNormalizer new
-elements: els;
-normalizeSize:[:e| e classes size] min: 10 max: 50. view @ RTDraggableView.
-el @ RTDraggable.
+ei := RTEdgeBuilder new.
+ei view: view.
+ei objects: classes.
+ei shape line color: Color gray.
+ei connectFrom: #superclass to: #yourself.
+RTTreeLayout on: els.
+els @ (RTPopup new text: [ :e | e name , ' -&gt; ' , e methods size asString ]).
 els @ RTDraggable.
-els @ (RTPopup new textElement:[:e| e model name]).
-els @ RTHighlightable.
-els @ (RTMenuActivable new action: #inspect; action:#browse).
-els @ RTSetEdgeAlpha.
-view open</code></pre><figcaption></figcaption></figure>
+view @ RTDraggableView.
+view</code></pre><figcaption></figcaption></figure>
+
+</section><section>
+<h3>2.2.4. Normalization</h3>
+<p class="goal">Adjust the visualization using normalization to map color and size, and apply a more scalable layout.</p><ol><li>Remove messages <code>color:</code> and <code>size:</code> sent during the creation of elements</li>
+<li>Add an <code>RTMetricNormalizer</code> object to map the color and size</li>
+<li>Change the shape of elements to use <code>RTEllipse</code></li>
+<li>Push edges to the back of the circles</li>
+</ol>
+
+<p>
+<img src="figures/code_changes_3.png" width="100%"/>
+</p>
+
+<figure><pre><code class="smalltalk">classes := Collection withAllSubclasses.
+view := RTView new.
+els := RTEllipse new
+	elementsOn: classes.
+view addAll: els.
+ei := RTEdgeBuilder new.
+ei view: view.
+ei objects: classes.
+ei shape line color: Color gray.
+ei connectFrom: #superclass to: #yourself.
+RTMetricNormalizer new
+	elements: els;
+	normalizeSize: #numberOfLinesOfCode;
+	normalizeColor: [ :e | e methods size ]
+		using:
+		{Color veryLightGray.
+		Color red}
+		using: #sqrt.
+RTClusterLayout on: els.
+els @ (RTPopup new text: [ :e | e name , ' -&gt; ' , e methods size asString ]).
+els @ RTDraggable.
+view @ RTDraggableView.
+view pushBackEdges.
+view</code></pre><figcaption></figcaption></figure>
+
+</section><section>
+<h3>2.2.5. Bezier Edges</h3>
+<p class="goal">Add a different kind of edges to depict class dependencies</p><ol><li>Add bezier edges from each class to dependent classes</li>
+</ol>
+
+<p>
+<img src="figures/code_changes_4.png" width="100%"/>
+</p>
+
+<figure><pre><code class="smalltalk">classes := Collection withAllSubclasses.
+view := RTView new.
+els := RTEllipse new
+	elementsOn: classes.
+view addAll: els.
+ei := RTEdgeBuilder new.
+ei view: view.
+ei objects: classes.
+ei shape line color: Color gray.
+ei connectFrom: #superclass to: #yourself.
+RTMetricNormalizer new
+	elements: els;
+	normalizeSize: #numberOfLinesOfCode;
+	normalizeColor: [ :e | e methods size ]
+		using:
+		{Color veryLightGray.
+		Color red}
+		using: #sqrt.
+RTClusterLayout on: els.
+eb := RTEdgeBuilder new.
+eb view: view.
+eb objects: classes.
+eb shape
+	bezierLineFollowing: #superclass;
+	color: (Color blue alpha: 0.1).
+eb connectFrom: #yourself toAll: #dependentClasses.
+els @ (RTPopup new text: [ :e | e name , ' -&gt; ' , e methods size asString ]).
+els @ RTDraggable.
+view @ RTDraggableView.
+view pushBackEdges.
+view</code></pre><figcaption></figcaption></figure>
 
 </section></section><section>
-<h1>4. Builders</h1>
+<h2>2.3. Does it scale to larger software?</h2>
 <p>
-A builder encapsulates the logic of visualization and it maps a particular domain to visual elements. It eases the reuse of domain-specific visualizations. Developers can define custom builders by sub classing RTBuilder. The custom builder should define public methods for end-users to specify the objects to be visualized, layouts that can be applied and any other attribute specific to the domain. The custom builder should override the renderIn: method where it can specify how the visualization is built. The following examples (amongst others) of domain-specific builder are found in Roassal Examples.
-</p><ol><li>UML</li>
-<li>RTCharterBuilder III. RTPieBuilder</li>
-<li>RTSpectrograph V. RTSunburstBuilder VI. RTGraphBuilder</li>
-<li>RTNameCloud</li>
-<li>RTMondrianViewBuilder</li>
-<li>RTMapLocationBuilder</li>
+Let's see. Now we are going to load a model of <strong>Tomcat</strong> into the Moose image and ajdust the visualization to analyze it. The model contains a description  of the main properties of the software such as classes, methods and invocations. Also, we are going to link the model to the software's source code, so we can inspect it within the visualization.  
+</p>
+<section>
+<h3>2.3.1. Set-up</h3>
+<ol><li>Download Tomcat's <a href="http://scg.unibe.ch/download/merino/roassal-tutorial/tomcat-7.0.2.mse">model</a> and <a href="http://scg.unibe.ch/download/merino/roassal-tutorial/tomcat-7.0.2-src.zip">sources</a></li>
+<li>In Moose open from the menu the <em>Moose panel</em> and load the <em>MSE</em> model file</li>
+<li>Once the model is loaded, decompress the zip file that contains the sources. In the panel right-click the model and select <em>utilities&gt;Set root folder</em>, then specify the local folder that contains Tomcat's sources.</li>
 </ol>
 
 </section><section>
-<h1>5. Resources</h1>
-<ol><li>Agilevisualization.com (book in progess)</li>
-<li>Roassalexamples</li>
-<li>Deep into Pharo book</li>
-<li>Mailing lists Pharo / Moose</li>
+<h3>2.3.2. Visualizing Tomcat's class hierarchy and dependencies</h3>
+<p class="goal">Show how the visualization performs on larger software (~1 min.).</p><ol><li>Adapt the data source to point to the classes within the Tomcat's model</li>
+<li>Modify the calls accordingly to obtain the dependent classes (other calls use similar signatures)</li>
+</ol>
+
+<p>
+<img src="figures/code_changes_5.png" width="100%"/>
+</p>
+
+<figure><pre><code class="smalltalk">classes := MooseModel root first allClasses.
+view := RTView new.
+els := RTEllipse new
+	elementsOn: classes.
+view addAll: els.
+ei := RTEdgeBuilder new.
+ei view: view.
+ei objects: classes.
+ei shape line color: Color gray.
+ei connectFrom: #superclass to: #yourself.
+RTMetricNormalizer new
+	elements: els;
+	normalizeSize: #numberOfLinesOfCode;
+	normalizeColor: [ :e | e methods size ]
+		using:
+		{Color veryLightGray.
+		Color red}
+		using: #sqrt.
+RTClusterLayout on: els.
+eb := RTEdgeBuilder new.
+eb view: view.
+eb objects: classes.
+eb shape
+	bezierLineFollowing: #superclass;
+	color: (Color blue alpha: 0.1).
+eb connectFrom: #yourself toAll: [ :e | e methods flatCollect: #clientTypes ].
+els @ (RTPopup new text: [ :e | e name , ' -&gt; ' , e methods size asString ]).
+els @ RTDraggable.
+view @ RTDraggableView.
+view pushBackEdges.
+view</code></pre><figcaption></figcaption></figure>
+
+</section><section>
+<h3>2.3.3. Adapting the visualization for larger software</h3>
+<p class="goal">Distinguish Tomcat classes from libraries (Java core and external libs) and change the layout to ease the analysis of dependencies (~2.5 mins.)</p><ol><li>When creating elements use the message <code>color:</code> to distinguish the source of a class (whether or not it belongs to Tomcat) and remove the previous definition from the normalizer</li>
+<li>Change the layout to <code>RTForceBasedLayout</code></li>
+</ol>
+
+<p>
+<img src="figures/code_changes_6.png" width="100%"/>
+</p>
+
+<figure><pre><code>classes := MooseModel root first allClasses.
+view := RTView new.
+els := RTEllipse new
+	color:[:e| (MooseModel root first allModelClasses includes:e) 
+			ifTrue:[Color blue] ifFalse:[Color red] ]; 
+	elementsOn: classes.
+ei := RTEdgeBuilder new.
+ei view: view.
+ei objects: classes.
+ei shape line color: Color gray.
+ei connectFrom: #superclass to: #yourself.
+
+RTMetricNormalizer new
+	elements: els;
+	normalizeSize: #numberOfLinesOfCode.
+RTForceBasedLayout on: els.
+
+eb := RTEdgeBuilder new.
+eb view: view.
+eb objects: classes.
+eb shape
+	bezierLineFollowing: #superclass;
+	color: (Color blue alpha: 0.1).
+eb connectFrom: #yourself toAll: [ :e | e methods flatCollect: #clientTypes ].
+els @ (RTPopup new text: [ :e | e name , ' -&gt; ' , e methods size asString ]).
+els @ RTDraggable.
+view @ RTDraggableView.
+view pushBackEdges.
+view</code></pre><figcaption></figcaption></figure>
+
+
+</section></section></section><section>
+<h1>3. Exercise</h1>
+<p>
+Using Roassal API build a visualization that uses a Treemap to depict Tomcat's class hierarchy. Map to the area of the tiles the number of lines of code of the class they represent. Use two different colors to identify the classes that contain deprecated methods and the ones that might be tests. Hint: (1) you can assume that the name of test classes contain the <code>Test</code> word. (2) Include in the visualization stubs of the Java core and libs classes (.e.g., <code>Object</code>). (3) Notice that the model of the methods of a class contain its annotations.  
+</p>
+<p>
+<img src="figures/treemap.png" width="40%"/>
+</p>
+<p class="goal">Solution</p><figure><pre><code>| b |
+b := RTTreeMapBuilder new.
+b shape
+	color: Color transparent;
+	borderColor: Color black;
+	if: [ :obj | obj isClass ]
+		color: [ :cls | 
+		(cls methods
+			anySatisfy: [ :m | m annotationTypes contains: [ :e | e name = 'Deprecated' ] ])
+			ifTrue: [ Color blue ]
+			ifFalse: [ (cls name findString: 'Test') &gt; 0
+					ifTrue: [ Color green ]
+					ifFalse: [ Color gray ] ] ].
+b
+	leafWeight: #numberOfLinesOfCode;
+	explore: MooseModel root first allClasses anyOne superclass
+		using: [ :e | e subInheritances collect: #subclass ].
+^ b</code></pre><figcaption></figcaption></figure>
+
+</section><section>
+<h1>4. Resources</h1>
+<p>
+Links to resources for more detail on the Pharo language, the Moose plataform and the Roassal visualization engine. 
+</p>
+<ol><li><a href="http://pharo.org/">Pharo</a></li>
+<li><a href="http://www.moosetechnology.org/">Moose technology</a></li>
+<li><a href="http://www.deepintopharo.com/">Deep into Pharo book</a></li>
+<li><a href="http://www.agilevisualization.com">Agile Visualization book</a></li>
+<li>Roassal examples shipped in the Pharo/Moose image.</li>
+<li><a href="http://pharo.org/community">Pharo users mailing lists</a></li>
 </ol>
 </section>
     </div>
